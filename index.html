@@ -7,12 +7,12 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>BINGO v1013</title>
+  <title>BINGO v1014</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css?v=1013" />
+  <link rel="stylesheet" href="style.css?v=1014" />
 </head>
 <body>
-  <main id="app" class="app" aria-label="BINGO v1013">
+  <main id="app" class="app" aria-label="BINGO v1014">
     <section id="screenStart" class="screen screen-start is-active" aria-label="Ekran startowy BINGO">
       <div class="stage stage-start">
         <button id="btnPlay" class="hit-btn hit-play" type="button" aria-label="Graj">GRAJ</button>
@@ -32,6 +32,14 @@
             <strong id="roomCode" class="info-value room-value">PWG5N2D</strong>
           </div>
         </div>
+
+        <aside id="rankingPanel" class="ranking-panel" aria-label="Tabela graczy">
+          <div class="ranking-title">TABELA</div>
+          <div class="ranking-head">
+            <span>#</span><span>NICK</span><span>PKT</span><span>GRY</span><span>ŚR</span>
+          </div>
+          <div id="rankingRows" class="ranking-rows"></div>
+        </aside>
 
         <div id="drawMachine" class="draw-machine" aria-label="Maszyna losująca">
           <div id="drawBall" class="draw-ball">?</div>
@@ -53,6 +61,6 @@
       </div>
     </section>
   </main>
-  <script src="app.js?v=1013"></script>
+  <script src="app.js?v=1014"></script>
 </body>
 </html>

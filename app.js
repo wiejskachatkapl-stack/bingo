@@ -1,7 +1,8 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1013';
+  const VERSION = 'BINGO v1014';
+  const STATS_KEY = 'bingoStats_v1014';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
@@ -16,6 +17,7 @@
   const drawnNumbersEl = document.getElementById('drawnNumbers');
   const btnStartDraw = document.getElementById('btnStartDraw');
   const bingoWinMessage = document.getElementById('bingoWinMessage');
+  const rankingRows = document.getElementById('rankingRows');
 
   const params = new URLSearchParams(window.location.search);
 
@@ -30,7 +32,9 @@
     bingoFinished: false,
     isDrawing: false,
     winMessageTimer: null,
-    winningLine: []
+    winningLine: [],
+    resultRecorded: false,
+    stats: getStatsStore()
   };
 
   function getStored(key){
@@ -50,6 +54,99 @@
     return String(name || '').trim().slice(0,18) || 'GRACZ';
   }
 
+  function getStatsStore(){
+    try {
+      const raw = localStorage.getItem(STATS_KEY);
+      const parsed = raw ? JSON.parse(raw) : {};
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch(e){
+      return {};
+    }
+  }
+
+  function saveStatsStore(){
+    try { localStorage.setItem(STATS_KEY, JSON.stringify(state.stats)); } catch(e) {}
+  }
+
+  function ensurePlayerStats(players){
+    players.forEach(name => {
+      const clean = normalizeName(name);
+      if(!state.stats[clean]){
+        state.stats[clean] = { points: 0, games: 0 };
+      }
+      if(typeof state.stats[clean].points !== 'number') state.stats[clean].points = 0;
+      if(typeof state.stats[clean].games !== 'number') state.stats[clean].games = 0;
+    });
+    saveStatsStore();
+  }
+
+  function getAverage(playerName){
+    const row = state.stats[playerName] || { points: 0, games: 0 };
+    if(!row.games) return 0;
+    return row.points / row.games;
+  }
+
+  function getSortedRanking(){
+    ensurePlayerStats(state.players.length ? state.players : [state.nick]);
+    return (state.players.length ? state.players : [state.nick]).map(name => {
+      const clean = normalizeName(name);
+      const row = state.stats[clean] || { points: 0, games: 0 };
+      return {
+        name: clean,
+        points: row.points || 0,
+        games: row.games || 0,
+        avg: getAverage(clean)
+      };
+    }).sort((a,b) => {
+      if(b.avg !== a.avg) return b.avg - a.avg;
+      if(b.points !== a.points) return b.points - a.points;
+      if(a.games !== b.games) return a.games - b.games;
+      return a.name.localeCompare(b.name, 'pl');
+    });
+  }
+
+  function renderRanking(){
+    if(!rankingRows) return;
+    const rows = getSortedRanking();
+    rankingRows.innerHTML = '';
+    rows.forEach((row, index) => {
+      const item = document.createElement('div');
+      item.className = 'ranking-row';
+      if(row.name === state.nick) item.classList.add('is-me');
+
+      const cells = [
+        String(index + 1),
+        row.name,
+        String(row.points),
+        String(row.games),
+        row.games ? row.avg.toFixed(2) : '0.00'
+      ];
+
+      cells.forEach((text, cellIndex) => {
+        const span = document.createElement('span');
+        span.textContent = text;
+        if(cellIndex === 1) span.className = 'ranking-name';
+        item.appendChild(span);
+      });
+      rankingRows.appendChild(item);
+    });
+  }
+
+  function recordGameResult(winnerName){
+    if(state.resultRecorded) return;
+    const roomPlayers = state.players.length ? state.players : [state.nick];
+    ensurePlayerStats(roomPlayers);
+    roomPlayers.forEach(name => {
+      state.stats[name].games += 1;
+    });
+    const cleanWinner = normalizeName(winnerName || state.nick);
+    ensurePlayerStats([cleanWinner]);
+    state.stats[cleanWinner].points += 1;
+    state.resultRecorded = true;
+    saveStatsStore();
+    renderRanking();
+  }
+
   function setRoomData(nick, roomCode){
     state.nick = normalizeName(nick);
     state.roomCode = String(roomCode || '').trim().slice(0,10).toUpperCase() || 'POKÓJ';
@@ -62,8 +159,10 @@
   function setPlayers(players){
     const clean = Array.from(new Set((players || []).map(normalizeName))).slice(0,8);
     state.players = clean.length ? clean : [state.nick];
+    ensurePlayerStats(state.players);
     renderPlayers(state.players);
     updatePlayerProgress();
+    renderRanking();
   }
 
   function renderPlayers(players){
@@ -105,11 +204,7 @@
     for(let row=0; row<5; row++){
       for(let col=0; col<5; col++){
         const isFree = row===2 && col===2;
-        card.push({
-          value: isFree ? '★' : columns[col][row],
-          marked: isFree,
-          free: isFree
-        });
+        card.push({ value: isFree ? '★' : columns[col][row], marked: isFree, free: isFree });
       }
     }
     return card;
@@ -185,6 +280,7 @@
   function showBingoWinner(winnerName){
     stopDraws();
     state.winningLine = getWinningLine();
+    recordGameResult(winnerName || state.nick);
     if(!bingoWinMessage) return;
     const cleanWinner = normalizeName(winnerName || state.nick);
     bingoWinMessage.innerHTML = '';
@@ -194,14 +290,9 @@
     subtitle.textContent = 'Wygrał: ' + cleanWinner;
     bingoWinMessage.appendChild(title);
     bingoWinMessage.appendChild(subtitle);
-    if(state.winningLine.length){
-      bingoWinMessage.appendChild(renderWinningBoard());
-    }
+    if(state.winningLine.length) bingoWinMessage.appendChild(renderWinningBoard());
     bingoWinMessage.classList.add('is-visible');
-    if(state.winMessageTimer){
-      clearTimeout(state.winMessageTimer);
-      state.winMessageTimer = null;
-    }
+    if(state.winMessageTimer){ clearTimeout(state.winMessageTimer); state.winMessageTimer = null; }
     state.winMessageTimer = setTimeout(() => {
       bingoWinMessage.classList.remove('is-visible');
       bingoWinMessage.innerHTML = '';
@@ -275,6 +366,7 @@
     state.bingoFinished = false;
     state.isDrawing = false;
     state.winningLine = [];
+    state.resultRecorded = false;
     if(state.drawTimer){ clearTimeout(state.drawTimer); state.drawTimer = null; }
     if(state.drawSpinTimer){ clearInterval(state.drawSpinTimer); state.drawSpinTimer = null; }
     if(drawBall){ drawBall.classList.remove('is-spinning'); drawBall.textContent = '?'; }
@@ -322,6 +414,7 @@
     state.card = createBingoCard();
     renderBingoCard();
     updatePlayerProgress();
+    renderRanking();
   }
 
   function openGame(){
@@ -376,10 +469,13 @@
     newGameCard,
     stopDraws,
     updatePlayerProgress,
-    showBingoWinner
+    showBingoWinner,
+    renderRanking
   };
 
   setRoomData(state.nick, state.roomCode);
+  ensurePlayerStats([state.nick]);
+  renderRanking();
   clearOldCache();
   showScreen('start');
 })();
