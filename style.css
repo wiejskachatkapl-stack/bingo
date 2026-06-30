@@ -43,7 +43,7 @@ button{font-family:inherit}
   .stage{width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh}
 }
 @media (max-width:700px){
-  .game-controls{left:20.2%;top:71.2%;width:24.8%;height:8.0%;gap:3.5%}
+  .game-controls{left:41.2%;top:71.2%;width:12.0%;height:8.0%;gap:0}
   .game-action-btn{border-width:1px;border-radius:8px;font-size:clamp(7px,1.0vw,11px)}
   .bingo-win-message{width:52%;min-height:22%;border-radius:16px;border-width:2px}
 
@@ -213,37 +213,34 @@ button{font-family:inherit}
   line-height:1;
 }
 
-/* Przyciski START STOP BINGO i komunikat zwycięzcy. */
+/* Przycisk START i komunikat zwycięzcy. */
 .game-controls{
   position:absolute;
-  left:20.8%;
+  left:41.8%;
   top:71.2%;
-  width:23.5%;
+  width:11.0%;
   height:8.2%;
   display:flex;
   align-items:center;
   justify-content:center;
-  gap:4.2%;
   pointer-events:auto;
 }
 .game-action-btn{
-  width:31%;
+  width:100%;
   height:76%;
   border:2px solid rgba(255,255,255,.78);
   border-radius:14px;
-  color:#ffffff;
+  color:#111111;
   font-weight:900;
   font-size:clamp(10px,1.1vw,20px);
   letter-spacing:.05em;
   cursor:pointer;
-  text-shadow:0 0 9px rgba(255,255,255,.95);
-  box-shadow:0 0 14px currentColor, inset 0 0 14px rgba(255,255,255,.12);
+  text-shadow:none;
+  box-shadow:0 0 14px rgba(76,255,154,.95), inset 0 0 14px rgba(255,255,255,.18);
   user-select:none;
 }
 .game-action-btn:active{transform:scale(.96)}
-.btn-start-draw{background:linear-gradient(180deg,rgba(55,255,130,.92),rgba(0,136,54,.94));color:#50ff93}
-.btn-stop-draw{background:linear-gradient(180deg,rgba(255,67,67,.92),rgba(145,0,0,.94));color:#ff5959}
-.btn-bingo{background:linear-gradient(180deg,rgba(255,224,83,.96),rgba(219,139,0,.96));color:#ffe86a}
+.btn-start-draw{background:linear-gradient(180deg,rgba(55,255,130,.96),rgba(0,136,54,.96));color:#111111}
 .bingo-win-message{
   position:absolute;
   left:50%;
