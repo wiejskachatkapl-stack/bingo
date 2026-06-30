@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#070018" />
-  <title>BINGO v1008</title>
+  <title>BINGO v1009</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css?v=1008" />
+  <link rel="stylesheet" href="style.css?v=1009" />
 </head>
 <body>
-  <main id="app" class="app" aria-label="BINGO v1008">
+  <main id="app" class="app" aria-label="BINGO v1009">
     <section id="screenStart" class="screen screen-start is-active" aria-label="Ekran startowy BINGO">
       <div class="stage stage-start">
         <button id="btnPlay" class="hit-btn hit-play" type="button" aria-label="Graj">GRAJ</button>
@@ -40,10 +40,18 @@
 
         <aside id="playersPanel" class="players-panel" aria-label="Gracze w pokoju"></aside>
 
+        <div id="gameControls" class="game-controls" aria-label="Sterowanie grą">
+          <button id="btnStartDraw" class="game-action-btn btn-start-draw" type="button">START</button>
+          <button id="btnStopDraw" class="game-action-btn btn-stop-draw" type="button">STOP</button>
+          <button id="btnBingo" class="game-action-btn btn-bingo" type="button">BINGO</button>
+        </div>
+
+        <div id="bingoWinMessage" class="bingo-win-message" aria-live="polite"></div>
+
         <button id="btnExitGame" class="hit-btn hit-exit-game" type="button" aria-label="Wyjście">WYJŚCIE</button>
       </div>
     </section>
   </main>
-  <script src="app.js?v=1008"></script>
+  <script src="app.js?v=1009"></script>
 </body>
 </html>

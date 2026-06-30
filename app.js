@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1008';
+  const VERSION = 'BINGO v1009';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
@@ -14,6 +14,10 @@
   const bingoBoard = document.getElementById('bingoBoard');
   const drawBall = document.getElementById('drawBall');
   const drawnNumbersEl = document.getElementById('drawnNumbers');
+  const btnStartDraw = document.getElementById('btnStartDraw');
+  const btnStopDraw = document.getElementById('btnStopDraw');
+  const btnBingo = document.getElementById('btnBingo');
+  const bingoWinMessage = document.getElementById('bingoWinMessage');
 
   const params = new URLSearchParams(window.location.search);
 
@@ -26,7 +30,8 @@
     drawTimer: null,
     drawSpinTimer: null,
     bingoFinished: false,
-    isDrawing: false
+    isDrawing: false,
+    winMessageTimer: null
   };
 
   function getStored(key){
@@ -271,6 +276,27 @@
     }, 3000);
   }
 
+  function showBingoWinner(winnerName){
+    stopDraws();
+
+    if(!bingoWinMessage) return;
+
+    const cleanWinner = normalizeName(winnerName || state.nick);
+    bingoWinMessage.innerHTML = '<strong>BINGO!</strong><span>Wygrał: ' + cleanWinner + '</span>';
+    bingoWinMessage.classList.add('is-visible');
+
+    if(state.winMessageTimer){
+      clearTimeout(state.winMessageTimer);
+      state.winMessageTimer = null;
+    }
+
+    state.winMessageTimer = setTimeout(() => {
+      bingoWinMessage.classList.remove('is-visible');
+      bingoWinMessage.innerHTML = '';
+      state.winMessageTimer = null;
+    }, 3000);
+  }
+
   function stopDraws(){
     state.bingoFinished = true;
 
@@ -346,7 +372,7 @@
 
   function checkBingoStop(){
     if(getBestLineProgress() >= 5){
-      stopDraws();
+      showBingoWinner(state.nick);
     }
   }
 
@@ -355,7 +381,6 @@
     state.card = createBingoCard();
     renderBingoCard();
     updatePlayerProgress();
-    startAutoDraw();
   }
 
   function openGame(){
@@ -379,6 +404,13 @@
   }
 
   btnPlay.addEventListener('click', openGame);
+  btnStartDraw.addEventListener('click', () => {
+    if(state.bingoFinished) return;
+    if(state.isDrawing || state.drawTimer) return;
+    drawNextNumber();
+  });
+  btnStopDraw.addEventListener('click', stopDraws);
+  btnBingo.addEventListener('click', () => showBingoWinner(state.nick));
   btnExitStart.addEventListener('click', exitToGameRoom);
   btnExitGame.addEventListener('click', () => {
     stopDraws();
@@ -397,14 +429,15 @@
     showStart: () => showScreen('start'),
     newGameCard,
     stopDraws,
-    updatePlayerProgress
+    updatePlayerProgress,
+    showBingoWinner
   };
 
   setRoomData(state.nick, state.roomCode);
 
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js?v=1008').catch(()=>{});
+      navigator.serviceWorker.register('./sw.js?v=1009').catch(()=>{});
     });
   }
 
