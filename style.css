@@ -31,6 +31,57 @@ button{font-family:inherit}
 .info-value{display:block;width:100%;text-align:center;color:#fff;font-weight:900;letter-spacing:.02em;line-height:1;text-shadow:0 0 8px rgba(255,255,255,.95),0 0 18px currentColor;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 .35vw}
 .nick-value,.room-value{font-size:clamp(8px,.95vw,17px)}
 
+
+/* Karta BINGO aktualnego gracza. Nowa karta jest losowana po kliknięciu GRAJ. */
+.bingo-card{
+  position:absolute;
+  left:37.7%;
+  top:25.5%;
+  width:25.4%;
+  height:48.5%;
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  grid-template-rows:.52fr repeat(5,1fr);
+  gap:.42vw;
+  padding:1.1%;
+  border:2px solid rgba(255,255,255,.78);
+  border-radius:18px;
+  background:rgba(3,0,18,.42);
+  box-shadow:0 0 16px rgba(255,255,255,.35), inset 0 0 24px rgba(26,183,255,.10);
+}
+.bingo-head{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:clamp(12px,1.45vw,27px);
+  font-weight:900;
+  letter-spacing:.12em;
+  text-shadow:0 0 10px rgba(255,255,255,.9),0 0 16px rgba(26,183,255,.65);
+  line-height:1;
+}
+.bingo-cell{
+  border:2px solid rgba(255,255,255,.82);
+  border-radius:8px;
+  background:rgba(7,9,35,.68);
+  color:#fff;
+  font-size:clamp(12px,1.55vw,28px);
+  font-weight:900;
+  line-height:1;
+  text-align:center;
+  cursor:pointer;
+  box-shadow:0 0 8px rgba(255,255,255,.36), inset 0 0 12px rgba(255,255,255,.05);
+  text-shadow:0 0 6px rgba(255,255,255,.95);
+}
+.bingo-cell:active{transform:scale(.96)}
+.bingo-cell.is-marked{
+  color:#001f0c;
+  background:linear-gradient(180deg,#84ffb3,#17e66d 55%,#00ac48);
+  border-color:#baffd0;
+  box-shadow:0 0 14px rgba(76,255,154,.95), inset 0 0 16px rgba(255,255,255,.28);
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+}
+
 /* Lista graczy po prawej. Jest pusta, dopóki w pokoju nie ma graczy. */
 .players-panel{position:absolute;right:5.9%;top:13.5%;bottom:18.5%;width:18.2%;display:flex;flex-direction:column;justify-content:flex-start;gap:2.3%;padding:.4% 0;pointer-events:none}
 .player-row{width:100%;min-height:10%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6vh;color:#ffffff;text-shadow:0 0 10px rgba(255,255,255,.95)}
@@ -46,6 +97,9 @@ button{font-family:inherit}
   .left-info{left:10.6%;top:35.0%;width:9.0%}
   .info-label{font-size:clamp(5px,.8vw,9px)}
   .nick-value,.room-value{font-size:clamp(6px,1.0vw,11px)}
+  .bingo-card{left:37.4%;top:25.8%;width:25.8%;height:48%;gap:.25vw;border-radius:10px;padding:.8%}
+  .bingo-head{font-size:clamp(8px,1.35vw,14px)}
+  .bingo-cell{font-size:clamp(8px,1.4vw,14px);border-width:1px;border-radius:5px}
   .players-panel{right:5.2%;top:13%;width:18.8%}
   .player-name{font-size:clamp(8px,1.4vw,14px)}
   .balls{gap:.25vw}
