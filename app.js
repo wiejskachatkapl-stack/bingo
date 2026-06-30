@@ -1,6 +1,8 @@
 (function(){
   'use strict';
+
   const VERSION = 'BINGO v1005';
+
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
   const btnPlay = document.getElementById('btnPlay');
@@ -9,14 +11,13 @@
   const playersPanel = document.getElementById('playersPanel');
   const playerNickEl = document.getElementById('playerNick');
   const roomCodeEl = document.getElementById('roomCode');
-  const bingoCardEl = document.getElementById('bingoCard');
+  const bingoBoard = document.getElementById('bingoBoard');
 
   const params = new URLSearchParams(window.location.search);
 
   const state = {
     nick: getStored('bingoNick') || params.get('nick') || 'Mariusz',
     roomCode: getStored('bingoRoomCode') || params.get('room') || 'PWG5N2D',
-    // Na starcie nie ma przykładowych graczy. Widoczny jest tylko aktualny gracz.
     players: [],
     card: []
   };
@@ -66,74 +67,86 @@
 
       const balls = document.createElement('div');
       balls.className = 'balls';
-      for(let i=0;i<5;i++) balls.appendChild(document.createElement('i'));
+      for(let i = 0; i < 5; i++){
+        balls.appendChild(document.createElement('i'));
+      }
 
       row.append(title, balls);
       playersPanel.appendChild(row);
     });
   }
 
+  function randomNumbers(min, max, count){
+    const numbers = [];
+    for(let n = min; n <= max; n++) numbers.push(n);
 
-  function shuffle(list){
-    const arr = list.slice();
-    for(let i = arr.length - 1; i > 0; i--){
+    for(let i = numbers.length - 1; i > 0; i--){
       const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
+      [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
     }
-    return arr;
-  }
 
-  function range(start, end){
-    const out = [];
-    for(let n = start; n <= end; n++) out.push(n);
-    return out;
+    return numbers.slice(0, count).sort((a, b) => a - b);
   }
 
   function createBingoCard(){
+    // Klasyczna karta BINGO: B 1-15, I 16-30, N 31-45, G 46-60, O 61-75.
     const columns = [
-      shuffle(range(1, 15)).slice(0, 5),
-      shuffle(range(16, 30)).slice(0, 5),
-      shuffle(range(31, 45)).slice(0, 5),
-      shuffle(range(46, 60)).slice(0, 5),
-      shuffle(range(61, 75)).slice(0, 5)
+      randomNumbers(1, 15, 5),
+      randomNumbers(16, 30, 5),
+      randomNumbers(31, 45, 5),
+      randomNumbers(46, 60, 5),
+      randomNumbers(61, 75, 5)
     ];
 
     const card = [];
     for(let row = 0; row < 5; row++){
-      const rowValues = [];
       for(let col = 0; col < 5; col++){
-        rowValues.push(columns[col][row]);
+        card.push({
+          value: columns[col][row],
+          marked: row === 2 && col === 2,
+          free: row === 2 && col === 2
+        });
       }
-      card.push(rowValues);
     }
+
+    card[12].value = '★';
     return card;
   }
 
   function renderBingoCard(){
-    bingoCardEl.innerHTML = '';
+    if(!bingoBoard) return;
 
-    const letters = ['B', 'I', 'N', 'G', 'O'];
+    bingoBoard.innerHTML = '';
+
+    const letters = ['B','I','N','G','O'];
     letters.forEach(letter => {
       const head = document.createElement('div');
       head.className = 'bingo-head';
       head.textContent = letter;
-      bingoCardEl.appendChild(head);
+      bingoBoard.appendChild(head);
     });
 
-    state.card.forEach(row => {
-      row.forEach(value => {
-        const cell = document.createElement('button');
-        cell.className = 'bingo-cell';
-        cell.type = 'button';
-        cell.textContent = String(value);
-        cell.setAttribute('aria-label', 'Pole BINGO ' + value);
-        cell.addEventListener('click', () => cell.classList.toggle('is-marked'));
-        bingoCardEl.appendChild(cell);
+    state.card.forEach((cell, index) => {
+      const button = document.createElement('button');
+      button.className = 'bingo-cell';
+      button.type = 'button';
+      button.textContent = cell.value;
+      button.dataset.index = String(index);
+
+      if(cell.marked) button.classList.add('is-marked');
+      if(cell.free) button.classList.add('is-free');
+
+      button.addEventListener('click', () => {
+        if(cell.free) return;
+        cell.marked = !cell.marked;
+        button.classList.toggle('is-marked', cell.marked);
       });
+
+      bingoBoard.appendChild(button);
     });
   }
 
-  function startNewRound(){
+  function newGameCard(){
     state.card = createBingoCard();
     renderBingoCard();
   }
@@ -141,7 +154,7 @@
   function openGame(){
     setRoomData(state.nick, state.roomCode);
     setPlayers(state.players.length ? state.players : [state.nick]);
-    startNewRound();
+    newGameCard();
     showScreen('game');
   }
 
@@ -164,17 +177,13 @@
     if(e.key === 'Escape') showScreen('start');
   });
 
-  // Proste wejście dla późniejszego GameRoom:
-  // window.BingoGame.setRoomData('Nick', 'KOD123');
-  // window.BingoGame.setPlayers(['Nick1','Nick2']);
-  // window.BingoGame.openGame();
   window.BingoGame = {
     version: VERSION,
     setRoomData,
     setPlayers,
     openGame,
-    startNewRound,
-    showStart: () => showScreen('start')
+    showStart: () => showScreen('start'),
+    newGameCard
   };
 
   setRoomData(state.nick, state.roomCode);
