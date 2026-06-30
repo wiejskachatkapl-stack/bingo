@@ -1,7 +1,7 @@
 {
-  "name": "BINGO v1007",
+  "name": "BINGO v1008",
   "short_name": "BINGO",
-  "start_url": "./index.html?v=1007",
+  "start_url": "./index.html?v=1008",
   "display": "standalone",
   "background_color": "#030012",
   "theme_color": "#070018",

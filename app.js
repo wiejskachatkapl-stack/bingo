@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1007';
+  const VERSION = 'BINGO v1008';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
@@ -59,6 +59,7 @@
     const clean = Array.from(new Set((players || []).map(normalizeName))).slice(0,8);
     state.players = clean.length ? clean : [state.nick];
     renderPlayers(state.players);
+    updatePlayerProgress();
   }
 
   function renderPlayers(players){
@@ -151,6 +152,8 @@
         if(cell.free) return;
         cell.marked = !cell.marked;
         button.classList.toggle('is-marked', cell.marked);
+        updatePlayerProgress();
+        checkBingoStop();
       });
 
       bingoBoard.appendChild(button);
@@ -286,10 +289,72 @@
     }
   }
 
+
+  function getMarkedIndexSet(){
+    const marked = new Set();
+
+    state.card.forEach((cell, index) => {
+      if(cell.marked) marked.add(index);
+    });
+
+    return marked;
+  }
+
+  function getBestLineProgress(){
+    const marked = getMarkedIndexSet();
+
+    const lines = [
+      [0,1,2,3,4],
+      [5,6,7,8,9],
+      [10,11,12,13,14],
+      [15,16,17,18,19],
+      [20,21,22,23,24],
+      [0,5,10,15,20],
+      [1,6,11,16,21],
+      [2,7,12,17,22],
+      [3,8,13,18,23],
+      [4,9,14,19,24],
+      [0,6,12,18,24],
+      [4,8,12,16,20]
+    ];
+
+    let best = 0;
+
+    lines.forEach(line => {
+      let count = 0;
+      line.forEach(index => {
+        if(marked.has(index)) count++;
+      });
+      if(count > best) best = count;
+    });
+
+    return Math.max(0, Math.min(5, best));
+  }
+
+  function updatePlayerProgress(){
+    const rows = playersPanel.querySelectorAll('.player-row');
+    const progress = getBestLineProgress();
+
+    rows.forEach((row, rowIndex) => {
+      const balls = row.querySelectorAll('.balls i');
+
+      balls.forEach((ball, index) => {
+        ball.classList.toggle('filled', index < progress && rowIndex === 0);
+      });
+    });
+  }
+
+  function checkBingoStop(){
+    if(getBestLineProgress() >= 5){
+      stopDraws();
+    }
+  }
+
   function newGameCard(){
     resetDrawMachine();
     state.card = createBingoCard();
     renderBingoCard();
+    updatePlayerProgress();
     startAutoDraw();
   }
 
@@ -331,14 +396,15 @@
     openGame,
     showStart: () => showScreen('start'),
     newGameCard,
-    stopDraws
+    stopDraws,
+    updatePlayerProgress
   };
 
   setRoomData(state.nick, state.roomCode);
 
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js?v=1007').catch(()=>{});
+      navigator.serviceWorker.register('./sw.js?v=1008').catch(()=>{});
     });
   }
 
