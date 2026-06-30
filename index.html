@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#070018" />
-  <title>BINGO v1001</title>
+  <title>BINGO v1002</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <main id="app" class="app" aria-label="BINGO v1001">
+  <main id="app" class="app" aria-label="BINGO v1002">
     <section id="screenStart" class="screen screen-start is-active" aria-label="Ekran startowy BINGO">
       <div class="stage stage-start">
         <button id="btnPlay" class="hit-btn hit-play" type="button" aria-label="Graj">GRAJ</button>
@@ -20,22 +20,11 @@
     <section id="screenGame" class="screen screen-game" aria-label="Ekran gry BINGO">
       <div class="stage stage-game">
         <div class="left-info" aria-label="Dane pokoju">
-          <div class="info-box nick-box">
-            <span>NICK</span>
-            <strong id="playerNick">Mariusz</strong>
-          </div>
-          <div class="info-box room-box">
-            <span>KOD POKOJU</span>
-            <strong id="roomCode">PWG5N2D</strong>
-          </div>
+          <strong id="playerNick" class="info-value nick-value">Mariusz</strong>
+          <strong id="roomCode" class="info-value room-value">PWG5N2D</strong>
         </div>
 
-        <aside id="playersPanel" class="players-panel" aria-label="Gracze w pokoju">
-          <div class="player-row" data-player="1">
-            <div class="player-name">MARIUSZ</div>
-            <div class="balls"><i></i><i></i><i></i><i></i><i></i></div>
-          </div>
-        </aside>
+        <aside id="playersPanel" class="players-panel" aria-label="Gracze w pokoju"></aside>
 
         <button id="btnExitGame" class="hit-btn hit-exit-game" type="button" aria-label="Wyjście">WYJŚCIE</button>
       </div>

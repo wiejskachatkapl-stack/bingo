@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bingo-v1001-cache';
+const CACHE_NAME = 'bingo-v1002-cache';
 const FILES = [
   './',
   './index.html',
