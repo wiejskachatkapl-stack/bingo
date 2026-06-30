@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1012';
+  const VERSION = 'BINGO v1013';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
@@ -29,7 +29,8 @@
     drawSpinTimer: null,
     bingoFinished: false,
     isDrawing: false,
-    winMessageTimer: null
+    winMessageTimer: null,
+    winningLine: []
   };
 
   function getStored(key){
@@ -120,20 +121,32 @@
     return marked;
   }
 
-  function getBestLineProgress(){
-    const marked = getMarkedIndexSet();
-    const lines = [
+  function getAllLines(){
+    return [
       [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
       [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
       [0,6,12,18,24],[4,8,12,16,20]
     ];
+  }
+
+  function getBestLineProgress(){
+    const marked = getMarkedIndexSet();
     let best = 0;
-    lines.forEach(line => {
+    getAllLines().forEach(line => {
       let count = 0;
       line.forEach(index => { if(marked.has(index)) count++; });
       if(count > best) best = count;
     });
     return Math.max(0, Math.min(5, best));
+  }
+
+  function getWinningLine(){
+    const marked = getMarkedIndexSet();
+    for(const line of getAllLines()){
+      const ok = line.every(index => marked.has(index));
+      if(ok) return line.slice();
+    }
+    return [];
   }
 
   function updatePlayerProgress(){
@@ -147,11 +160,43 @@
     });
   }
 
+  function renderWinningBoard(){
+    const wrap = document.createElement('div');
+    wrap.className = 'win-board';
+    const winSet = new Set(state.winningLine || []);
+    ['B','I','N','G','O'].forEach(letter => {
+      const head = document.createElement('div');
+      head.className = 'win-board-head';
+      head.textContent = letter;
+      wrap.appendChild(head);
+    });
+    state.card.forEach((cell,index) => {
+      const cellEl = document.createElement('div');
+      cellEl.className = 'win-board-cell';
+      cellEl.textContent = cell.value;
+      if(cell.marked) cellEl.classList.add('is-marked');
+      if(cell.free) cellEl.classList.add('is-free');
+      if(winSet.has(index)) cellEl.classList.add('is-winning');
+      wrap.appendChild(cellEl);
+    });
+    return wrap;
+  }
+
   function showBingoWinner(winnerName){
     stopDraws();
+    state.winningLine = getWinningLine();
     if(!bingoWinMessage) return;
     const cleanWinner = normalizeName(winnerName || state.nick);
-    bingoWinMessage.innerHTML = '<strong>BINGO!</strong><span>Wygrał: ' + cleanWinner + '</span>';
+    bingoWinMessage.innerHTML = '';
+    const title = document.createElement('strong');
+    title.textContent = 'BINGO!';
+    const subtitle = document.createElement('span');
+    subtitle.textContent = 'Wygrał: ' + cleanWinner;
+    bingoWinMessage.appendChild(title);
+    bingoWinMessage.appendChild(subtitle);
+    if(state.winningLine.length){
+      bingoWinMessage.appendChild(renderWinningBoard());
+    }
     bingoWinMessage.classList.add('is-visible');
     if(state.winMessageTimer){
       clearTimeout(state.winMessageTimer);
@@ -166,6 +211,13 @@
 
   function checkBingoStop(){
     if(getBestLineProgress() >= 5) showBingoWinner(state.nick);
+  }
+
+  function canMarkCell(cell){
+    if(cell.free) return false;
+    if(cell.marked) return true;
+    const value = Number(cell.value);
+    return state.drawnNumbers.includes(value);
   }
 
   function renderBingoCard(){
@@ -186,7 +238,7 @@
       if(cell.marked) button.classList.add('is-marked');
       if(cell.free) button.classList.add('is-free');
       button.addEventListener('click', () => {
-        if(cell.free) return;
+        if(!canMarkCell(cell)) return;
         cell.marked = !cell.marked;
         button.classList.toggle('is-marked', cell.marked);
         updatePlayerProgress();
@@ -222,6 +274,7 @@
     state.drawnNumbers = [];
     state.bingoFinished = false;
     state.isDrawing = false;
+    state.winningLine = [];
     if(state.drawTimer){ clearTimeout(state.drawTimer); state.drawTimer = null; }
     if(state.drawSpinTimer){ clearInterval(state.drawSpinTimer); state.drawSpinTimer = null; }
     if(drawBall){ drawBall.classList.remove('is-spinning'); drawBall.textContent = '?'; }
