@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1005';
+  const VERSION = 'BINGO v1006';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
@@ -56,6 +56,7 @@
 
   function renderPlayers(players){
     playersPanel.innerHTML = '';
+
     players.slice(0,8).forEach((name, idx) => {
       const row = document.createElement('div');
       row.className = 'player-row';
@@ -67,6 +68,7 @@
 
       const balls = document.createElement('div');
       balls.className = 'balls';
+
       for(let i = 0; i < 5; i++){
         balls.appendChild(document.createElement('i'));
       }
@@ -78,7 +80,10 @@
 
   function randomNumbers(min, max, count){
     const numbers = [];
-    for(let n = min; n <= max; n++) numbers.push(n);
+
+    for(let n = min; n <= max; n++){
+      numbers.push(n);
+    }
 
     for(let i = numbers.length - 1; i > 0; i--){
       const j = Math.floor(Math.random() * (i + 1));
@@ -89,7 +94,6 @@
   }
 
   function createBingoCard(){
-    // Klasyczna karta BINGO: B 1-15, I 16-30, N 31-45, G 46-60, O 61-75.
     const columns = [
       randomNumbers(1, 15, 5),
       randomNumbers(16, 30, 5),
@@ -99,17 +103,18 @@
     ];
 
     const card = [];
+
     for(let row = 0; row < 5; row++){
       for(let col = 0; col < 5; col++){
+        const isFree = row === 2 && col === 2;
         card.push({
-          value: columns[col][row],
-          marked: row === 2 && col === 2,
-          free: row === 2 && col === 2
+          value: isFree ? '★' : columns[col][row],
+          marked: isFree,
+          free: isFree
         });
       }
     }
 
-    card[12].value = '★';
     return card;
   }
 
@@ -118,8 +123,7 @@
 
     bingoBoard.innerHTML = '';
 
-    const letters = ['B','I','N','G','O'];
-    letters.forEach(letter => {
+    ['B','I','N','G','O'].forEach(letter => {
       const head = document.createElement('div');
       head.className = 'bingo-head';
       head.textContent = letter;
@@ -160,12 +164,14 @@
 
   function exitToGameRoom(){
     const target = window.BINGO_EXIT_URL || '../index.html';
+
     try {
       if(window.parent && window.parent !== window){
         window.parent.postMessage({type:'BINGO_EXIT', version: VERSION}, '*');
         return;
       }
     } catch(e) {}
+
     window.location.href = target;
   }
 
@@ -189,7 +195,9 @@
   setRoomData(state.nick, state.roomCode);
 
   if('serviceWorker' in navigator){
-    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js?v=1006').catch(()=>{});
+    });
   }
 
   showScreen('start');

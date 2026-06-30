@@ -56,6 +56,8 @@ button{font-family:inherit}
 }
 
 
+
+
 /* Karta BINGO losowana dynamicznie po kliknięciu GRAJ. */
 .bingo-board{
   position:absolute;
