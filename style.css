@@ -22,11 +22,14 @@ button{font-family:inherit}
 .hit-exit-start{left:30.1%;top:74.4%;width:41.0%;height:14.2%}
 .hit-exit-game{right:3.0%;bottom:3.9%;width:16.4%;height:10.8%}
 
-/* Tekst nakładany dynamicznie na czyste tło: bez dodatkowych ramek i bez powielania napisów. */
-.left-info{position:absolute;left:10.2%;top:32.6%;width:11.2%;height:22%;pointer-events:none}
-.info-value{position:absolute;left:0;right:0;text-align:center;color:#fff;font-weight:900;letter-spacing:.02em;line-height:1;text-shadow:0 0 8px rgba(255,255,255,.95),0 0 18px currentColor;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 .25vw}
-.nick-value{top:4.8%;font-size:clamp(10px,1.1vw,20px)}
-.room-value{top:50.8%;font-size:clamp(10px,1.1vw,20px)}
+/* Dane pokoju nakładane dynamicznie na czyste tło. */
+.left-info{position:absolute;left:10.0%;top:31.8%;width:12.8%;height:24%;pointer-events:none;display:flex;flex-direction:column;gap:10%}
+.info-card{position:relative;width:100%;height:45%;border:2px solid currentColor;border-radius:12px;background:rgba(3,0,18,.48);box-shadow:0 0 10px currentColor,inset 0 0 16px rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden}
+.info-card-nick{color:var(--neon-pink)}
+.info-card-room{color:var(--neon-blue)}
+.info-label{font-size:clamp(8px,.85vw,15px);font-weight:900;line-height:1;text-shadow:0 0 8px currentColor;margin-bottom:5%}
+.info-value{display:block;width:100%;text-align:center;color:#fff;font-weight:900;letter-spacing:.02em;line-height:1;text-shadow:0 0 8px rgba(255,255,255,.95),0 0 18px currentColor;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 .35vw}
+.nick-value,.room-value{font-size:clamp(10px,1.25vw,22px)}
 
 /* Lista graczy po prawej. Jest pusta, dopóki w pokoju nie ma graczy. */
 .players-panel{position:absolute;right:5.9%;top:13.5%;bottom:18.5%;width:18.2%;display:flex;flex-direction:column;justify-content:flex-start;gap:2.3%;padding:.4% 0;pointer-events:none}
@@ -47,8 +50,9 @@ button{font-family:inherit}
   .stage{width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh}
 }
 @media (max-width:700px){
-  .left-info{left:10.1%;top:32.5%;width:11.5%}
-  .nick-value,.room-value{font-size:clamp(8px,1.15vw,13px)}
+  .left-info{left:9.8%;top:31.6%;width:13.2%}
+  .info-label{font-size:clamp(6px,1.0vw,10px)}
+  .nick-value,.room-value{font-size:clamp(7px,1.25vw,13px)}
   .players-panel{right:5.2%;top:13%;width:18.8%}
   .player-name{font-size:clamp(8px,1.4vw,14px)}
   .balls{gap:.25vw}

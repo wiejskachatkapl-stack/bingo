@@ -1,6 +1,6 @@
 (function(){
   'use strict';
-  const VERSION = 'BINGO v1002';
+  const VERSION = 'BINGO v1003';
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
   const btnPlay = document.getElementById('btnPlay');
@@ -90,7 +90,7 @@
 
   btnPlay.addEventListener('click', openGame);
   btnExitStart.addEventListener('click', exitToGameRoom);
-  btnExitGame.addEventListener('click', exitToGameRoom);
+  btnExitGame.addEventListener('click', () => showScreen('start'));
 
   document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape') showScreen('start');
