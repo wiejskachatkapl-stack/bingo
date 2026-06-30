@@ -1,9 +1,9 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1017';
-  const STATS_KEY = 'bingoStats_v1017';
-  const ROOM_STATE_PREFIX = 'bingoRoomState_v1017_';
+  const VERSION = 'BINGO v1018';
+  const STATS_KEY = 'bingoStats_v1018';
+  const ROOM_STATE_PREFIX = 'bingoRoomState_v1018_';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
@@ -112,9 +112,10 @@
   }
 
   function normalizeRoomState(data){
-    const cleanOwner = normalizeName((data && data.owner) || '');
+    const rawOwner = String((data && data.owner) || '').trim();
+    const cleanOwner = rawOwner ? normalizeName(rawOwner) : '';
     const cleanPlayers = Array.isArray(data && data.players)
-      ? Array.from(new Set(data.players.map(normalizeName))).slice(0,8)
+      ? Array.from(new Set(data.players.map(normalizeName))).filter(name => name !== 'GRACZ' || state.nick === 'GRACZ').slice(0,8)
       : [];
     const joined = {};
     const rawJoined = (data && data.joined && typeof data.joined === 'object') ? data.joined : {};
@@ -148,7 +149,9 @@
   function syncRoomMembership(){
     let room = readRoomState();
 
-    if(!room.owner){
+    room.players = room.players.filter(name => name !== 'GRACZ' || state.nick === 'GRACZ');
+
+    if(!room.owner || (room.owner === 'GRACZ' && state.nick !== 'GRACZ')){
       room.owner = state.nick;
     }
 
