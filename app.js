@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1011';
+  const VERSION = 'BINGO v1012';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
