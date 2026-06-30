@@ -1,8 +1,9 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1016';
-  const STATS_KEY = 'bingoStats_v1016';
+  const VERSION = 'BINGO v1017';
+  const STATS_KEY = 'bingoStats_v1017';
+  const ROOM_STATE_PREFIX = 'bingoRoomState_v1017_';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
@@ -34,7 +35,8 @@
     winMessageTimer: null,
     winningLine: [],
     resultRecorded: false,
-    stats: getStatsStore()
+    stats: getStatsStore(),
+    roomState: null
   };
 
   function getStored(key){
@@ -86,9 +88,112 @@
     return row.points / row.games;
   }
 
+  function roomStateKey(){
+    return ROOM_STATE_PREFIX + (state.roomCode || 'POKOJ');
+  }
+
+  function readRoomState(){
+    try {
+      const raw = localStorage.getItem(roomStateKey());
+      const parsed = raw ? JSON.parse(raw) : {};
+      return normalizeRoomState(parsed);
+    } catch(e){
+      return normalizeRoomState({});
+    }
+  }
+
+  function saveRoomState(data){
+    const clean = normalizeRoomState(data);
+    try {
+      localStorage.setItem(roomStateKey(), JSON.stringify(clean));
+    } catch(e) {}
+    state.roomState = clean;
+    return clean;
+  }
+
+  function normalizeRoomState(data){
+    const cleanOwner = normalizeName((data && data.owner) || '');
+    const cleanPlayers = Array.isArray(data && data.players)
+      ? Array.from(new Set(data.players.map(normalizeName))).slice(0,8)
+      : [];
+    const joined = {};
+    const rawJoined = (data && data.joined && typeof data.joined === 'object') ? data.joined : {};
+    cleanPlayers.forEach(name => {
+      joined[name] = !!rawJoined[name];
+    });
+    return {
+      owner: cleanOwner,
+      players: cleanPlayers,
+      joined
+    };
+  }
+
+  function getDisplayPlayers(){
+    if(state.roomState && Array.isArray(state.roomState.players) && state.roomState.players.length){
+      return state.roomState.players.slice(0,8);
+    }
+    return (state.players.length ? state.players : [state.nick]).slice(0,8);
+  }
+
+  function isHost(){
+    return !!(state.roomState && state.roomState.owner === state.nick);
+  }
+
+  function isJoinedPlayer(name){
+    const clean = normalizeName(name);
+    if(state.roomState && state.roomState.owner === clean) return true;
+    return !!(state.roomState && state.roomState.joined && state.roomState.joined[clean]);
+  }
+
+  function syncRoomMembership(){
+    let room = readRoomState();
+
+    if(!room.owner){
+      room.owner = state.nick;
+    }
+
+    if(!room.players.includes(room.owner)){
+      room.players.unshift(room.owner);
+    }
+
+    const requestedPlayers = state.players.length ? state.players : [state.nick];
+    requestedPlayers.forEach(name => {
+      if(!room.players.includes(name)) room.players.push(name);
+    });
+
+    if(!room.players.includes(state.nick)){
+      room.players.push(state.nick);
+    }
+
+    room.players = room.players.slice(0,8);
+
+    room.players.forEach(name => {
+      if(typeof room.joined[name] !== 'boolean') room.joined[name] = false;
+    });
+
+    if(room.owner){
+      room.joined[room.owner] = true;
+    }
+
+    state.players = room.players.slice(0,8);
+    saveRoomState(room);
+    ensurePlayerStats(state.players);
+  }
+
+  function setRoomData(nick, roomCode){
+    state.nick = normalizeName(nick);
+    state.roomCode = String(roomCode || '').trim().slice(0,10).toUpperCase() || 'POKÓJ';
+    playerNickEl.textContent = state.nick;
+    roomCodeEl.textContent = state.roomCode;
+    setStored('bingoNick', state.nick);
+    setStored('bingoRoomCode', state.roomCode);
+    syncRoomMembership();
+  }
+
   function getSortedRanking(){
-    ensurePlayerStats(state.players.length ? state.players : [state.nick]);
-    return (state.players.length ? state.players : [state.nick]).map(name => {
+    const activePlayers = getDisplayPlayers();
+    ensurePlayerStats(activePlayers);
+    return activePlayers.map(name => {
       const clean = normalizeName(name);
       const row = state.stats[clean] || { points: 0, games: 0 };
       return {
@@ -134,7 +239,7 @@
 
   function recordGameResult(winnerName){
     if(state.resultRecorded) return;
-    const roomPlayers = state.players.length ? state.players : [state.nick];
+    const roomPlayers = getDisplayPlayers();
     ensurePlayerStats(roomPlayers);
     roomPlayers.forEach(name => {
       state.stats[name].games += 1;
@@ -147,22 +252,14 @@
     renderRanking();
   }
 
-  function setRoomData(nick, roomCode){
-    state.nick = normalizeName(nick);
-    state.roomCode = String(roomCode || '').trim().slice(0,10).toUpperCase() || 'POKÓJ';
-    playerNickEl.textContent = state.nick;
-    roomCodeEl.textContent = state.roomCode;
-    setStored('bingoNick', state.nick);
-    setStored('bingoRoomCode', state.roomCode);
-  }
-
   function setPlayers(players){
     const clean = Array.from(new Set((players || []).map(normalizeName))).slice(0,8);
     state.players = clean.length ? clean : [state.nick];
-    ensurePlayerStats(state.players);
-    renderPlayers(state.players);
+    syncRoomMembership();
+    renderPlayers(getDisplayPlayers());
     updatePlayerProgress();
     renderRanking();
+    updatePrimaryButton();
   }
 
   function renderPlayers(players){
@@ -171,15 +268,74 @@
       const row = document.createElement('div');
       row.className = 'player-row';
       row.dataset.player = String(idx + 1);
+      row.dataset.nick = name;
+
+      const titleLine = document.createElement('div');
+      titleLine.className = 'player-name-line';
+
       const title = document.createElement('div');
       title.className = 'player-name';
       title.textContent = name;
+
+      const readyDot = document.createElement('i');
+      readyDot.className = 'player-ready-dot';
+      if(isJoinedPlayer(name)) readyDot.classList.add('is-ready');
+      else readyDot.classList.add('is-not-ready');
+
+      titleLine.append(title, readyDot);
+
       const balls = document.createElement('div');
       balls.className = 'balls';
       for(let i = 0; i < 5; i++) balls.appendChild(document.createElement('i'));
-      row.append(title, balls);
+
+      row.append(titleLine, balls);
       playersPanel.appendChild(row);
     });
+  }
+
+  function updateReadyDots(){
+    const rows = playersPanel.querySelectorAll('.player-row');
+    rows.forEach(row => {
+      const nick = normalizeName(row.dataset.nick || '');
+      const dot = row.querySelector('.player-ready-dot');
+      if(!dot) return;
+      dot.classList.remove('is-ready', 'is-not-ready');
+      dot.classList.add(isJoinedPlayer(nick) ? 'is-ready' : 'is-not-ready');
+    });
+  }
+
+  function updatePrimaryButton(){
+    if(!btnStartDraw) return;
+    if(isHost()){
+      btnStartDraw.textContent = 'START';
+      btnStartDraw.classList.remove('btn-join-room');
+      btnStartDraw.setAttribute('aria-label', 'Start');
+    } else {
+      btnStartDraw.textContent = 'DOŁĄCZ';
+      btnStartDraw.classList.add('btn-join-room');
+      btnStartDraw.setAttribute('aria-label', 'Dołącz');
+    }
+  }
+
+  function joinCurrentPlayer(){
+    let room = readRoomState();
+    if(!room.owner){
+      room.owner = state.nick;
+    }
+    if(!room.players.includes(room.owner)) room.players.unshift(room.owner);
+    if(!room.players.includes(state.nick)) room.players.push(state.nick);
+    room.players = room.players.slice(0,8);
+    room.players.forEach(name => {
+      if(typeof room.joined[name] !== 'boolean') room.joined[name] = false;
+    });
+    room.joined[room.owner] = true;
+    room.joined[state.nick] = true;
+    saveRoomState(room);
+    state.players = room.players.slice(0,8);
+    renderPlayers(getDisplayPlayers());
+    updatePlayerProgress();
+    renderRanking();
+    updatePrimaryButton();
   }
 
   function randomNumbers(min, max, count){
@@ -253,6 +409,7 @@
         ball.classList.toggle('filled', index < progress && rowIndex === 0);
       });
     });
+    updateReadyDots();
   }
 
   function renderWinningBoard(){
@@ -446,9 +603,13 @@
 
   btnPlay.addEventListener('click', openGame);
   btnStartDraw.addEventListener('click', () => {
-    if(state.bingoFinished) return;
-    if(state.isDrawing || state.drawTimer) return;
-    drawNextNumber();
+    if(isHost()){
+      if(state.bingoFinished) return;
+      if(state.isDrawing || state.drawTimer) return;
+      drawNextNumber();
+    } else {
+      joinCurrentPlayer();
+    }
   });
   btnExitStart.addEventListener('click', exitToGameRoom);
   btnExitGame.addEventListener('click', () => {
@@ -458,6 +619,16 @@
 
   document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape') showScreen('start');
+  });
+
+  window.addEventListener('storage', (event) => {
+    if(event.key !== roomStateKey()) return;
+    state.roomState = readRoomState();
+    state.players = getDisplayPlayers();
+    renderPlayers(getDisplayPlayers());
+    updatePlayerProgress();
+    renderRanking();
+    updatePrimaryButton();
   });
 
   window.BingoGame = {
@@ -470,12 +641,16 @@
     stopDraws,
     updatePlayerProgress,
     showBingoWinner,
-    renderRanking
+    renderRanking,
+    joinCurrentPlayer
   };
 
   setRoomData(state.nick, state.roomCode);
   ensurePlayerStats([state.nick]);
+  renderPlayers(getDisplayPlayers());
+  updatePlayerProgress();
   renderRanking();
+  updatePrimaryButton();
   clearOldCache();
   showScreen('start');
 })();

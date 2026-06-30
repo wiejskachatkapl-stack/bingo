@@ -570,3 +570,42 @@ button{font-family:inherit}
     width:9.0%;
   }
 }
+
+
+/* v1017 - status graczy i przycisk DOŁĄCZ */
+.player-name-line{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.42vw;
+}
+.player-ready-dot{
+  display:block;
+  width:.82vw;
+  height:.82vw;
+  min-width:8px;
+  min-height:8px;
+  max-width:14px;
+  max-height:14px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.92);
+  box-shadow:0 0 8px rgba(255,255,255,.25);
+  flex:0 0 auto;
+}
+.player-ready-dot.is-ready{
+  background:#3cff6e;
+  box-shadow:0 0 10px rgba(60,255,110,.95), inset 0 0 4px rgba(255,255,255,.35);
+}
+.player-ready-dot.is-not-ready{
+  background:#ff3c3c;
+  box-shadow:0 0 10px rgba(255,60,60,.95), inset 0 0 4px rgba(255,255,255,.25);
+}
+.game-action-btn.btn-join-room{
+  font-size:clamp(9px,1.0vw,18px);
+}
+
+@media (max-width:700px){
+  .player-name-line{gap:.6vw}
+  .game-action-btn.btn-join-room{font-size:clamp(7px,.95vw,10px)}
+}
