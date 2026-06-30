@@ -416,3 +416,126 @@ button{font-family:inherit}
   .drawn-numbers{left:21.4%;right:24.2%;bottom:6.6%;gap:.28vw}
   .hit-exit-game{right:4.0%;bottom:5.8%;width:14.2%;height:11.0%}
 }
+
+
+/* v1015 - naprawa rozjechanej planszy po v1014.
+   Wymuszenie poprawnych proporcji i pozycji bez zmiany mechaniki. */
+.stage-game .bingo-board{
+  position:absolute;
+  left:35.8%;
+  top:25.8%;
+  width:28.2%;
+  height:41.6%;
+  display:grid !important;
+  grid-template-columns:repeat(5,1fr) !important;
+  grid-template-rows:.62fr repeat(5,1fr) !important;
+  gap:.48vw;
+  padding:.78%;
+  border-radius:18px;
+}
+
+.stage-game .bingo-head{
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  min-height:0;
+}
+
+.stage-game .bingo-cell{
+  display:flex !important;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  padding:0;
+}
+
+.stage-game .draw-machine{
+  left:26.0%;
+  top:46.7%;
+  width:6.7%;
+  height:12.0%;
+}
+
+.stage-game .game-controls{
+  left:24.35%;
+  top:60.6%;
+  width:9.8%;
+  height:6.7%;
+}
+
+.stage-game .drawn-numbers{
+  left:21.4%;
+  right:24.4%;
+  bottom:6.4%;
+  max-height:13.5%;
+  gap:.38vw;
+  padding:.25% .55%;
+}
+
+.stage-game .drawn-number{
+  min-width:1.92vw;
+  height:1.92vw;
+  max-width:33px;
+  max-height:33px;
+  min-height:16px;
+}
+
+.stage-game .hit-exit-game{
+  right:4.0%;
+  bottom:5.2%;
+  width:14.2%;
+  height:11.0%;
+}
+
+.stage-game .ranking-panel{
+  left:2.4%;
+  top:49.0%;
+  width:17.8%;
+  height:34.0%;
+}
+
+@media (max-width:700px){
+  .stage-game .bingo-board{
+    left:35.4%;
+    top:25.8%;
+    width:29.0%;
+    height:42.0%;
+    gap:.30vw;
+    border-radius:10px;
+  }
+  .stage-game .draw-machine{
+    left:25.7%;
+    top:47.0%;
+    width:7.0%;
+    height:12.2%;
+  }
+  .stage-game .game-controls{
+    left:23.9%;
+    top:60.7%;
+    width:10.3%;
+    height:6.7%;
+  }
+  .stage-game .drawn-numbers{
+    left:21.0%;
+    right:24.7%;
+    bottom:6.3%;
+    max-height:13.2%;
+    gap:.25vw;
+  }
+  .stage-game .hit-exit-game{
+    right:4.0%;
+    bottom:5.5%;
+    width:14.2%;
+    height:10.8%;
+  }
+  .stage-game .ranking-panel{
+    left:2.1%;
+    top:48.8%;
+    width:18.2%;
+    height:34.2%;
+  }
+}

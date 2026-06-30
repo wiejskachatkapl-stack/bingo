@@ -1,8 +1,8 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1014';
-  const STATS_KEY = 'bingoStats_v1014';
+  const VERSION = 'BINGO v1015';
+  const STATS_KEY = 'bingoStats_v1015';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
