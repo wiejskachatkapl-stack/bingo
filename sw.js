@@ -1,9 +1,9 @@
-const CACHE_NAME = 'bingo-v1006-cache';
+const CACHE_NAME = 'bingo-v1007-cache';
 const FILES = [
   './',
-  './index.html?v=1006',
-  './style.css?v=1006',
-  './app.js?v=1006',
+  './index.html?v=1007',
+  './style.css?v=1007',
+  './app.js?v=1007',
   './manifest.json',
   './assets/images/bingo_start.png',
   './assets/images/bingo_game_bg.png',

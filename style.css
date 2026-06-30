@@ -43,6 +43,10 @@ button{font-family:inherit}
   .stage{width:100vw;height:56.25vw;max-height:100vh;max-width:177.78vh}
 }
 @media (max-width:700px){
+  .draw-machine{left:23.4%;top:47.2%;width:7.8%;height:13.8%}
+  .drawn-numbers{left:18.2%;right:22.5%;bottom:6.3%;gap:.28vw}
+  .drawn-number{border-width:1px;min-width:12px;min-height:12px}
+
   .bingo-board{left:32.4%;top:25.8%;width:31.2%;height:42.8%;gap:.35vw;border-radius:10px}
   .bingo-cell{border-width:1px;border-radius:5px}
 
@@ -119,4 +123,88 @@ button{font-family:inherit}
   color:#ffffff;
   border-color:#9ae8ff;
   box-shadow:0 0 16px rgba(26,183,255,.9), inset 0 0 12px rgba(255,255,255,.25);
+}
+
+
+/* Maszyna losująca i lista wylosowanych liczb. */
+.draw-machine{
+  position:absolute;
+  left:23.7%;
+  top:46.8%;
+  width:7.5%;
+  height:13.3%;
+  pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 35% 28%, rgba(255,255,255,.95) 0 7%, rgba(255,255,255,.35) 8% 17%, transparent 18%),
+    radial-gradient(circle at 50% 50%, rgba(26,183,255,.20), rgba(255,63,189,.14) 48%, rgba(0,0,0,.18) 72%);
+  border:2px solid rgba(255,255,255,.62);
+  box-shadow:0 0 18px rgba(26,183,255,.55), inset 0 0 24px rgba(255,255,255,.14);
+}
+
+.draw-ball{
+  width:76%;
+  height:76%;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#081225;
+  font-weight:900;
+  font-size:clamp(16px,2.35vw,42px);
+  line-height:1;
+  background:
+    radial-gradient(circle at 33% 24%, #ffffff 0 9%, #f6f6f6 10% 28%, #ffd748 29% 64%, #d58d00 88%);
+  border:2px solid rgba(255,255,255,.86);
+  box-shadow:0 0 18px rgba(255,216,72,.80), inset -10px -14px 20px rgba(87,45,0,.30), inset 10px 9px 16px rgba(255,255,255,.48);
+  text-shadow:0 1px 0 rgba(255,255,255,.45);
+}
+
+.draw-ball.is-spinning{
+  animation:bingoBallSpin .42s linear infinite;
+  filter:blur(.2px) brightness(1.12);
+}
+
+@keyframes bingoBallSpin{
+  0%{transform:rotate(0deg) scale(1)}
+  50%{transform:rotate(180deg) scale(1.06)}
+  100%{transform:rotate(360deg) scale(1)}
+}
+
+.drawn-numbers{
+  position:absolute;
+  left:18.6%;
+  right:22.0%;
+  bottom:6.5%;
+  min-height:5.2%;
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-start;
+  gap:.42vw;
+  padding:.35% .7%;
+  pointer-events:none;
+  overflow:hidden;
+}
+
+.drawn-number{
+  min-width:2.08vw;
+  height:2.08vw;
+  max-width:36px;
+  max-height:36px;
+  min-height:18px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  color:#111;
+  background:linear-gradient(180deg,#ffe86a,#ffc400 62%,#d99100);
+  border:2px solid rgba(255,255,255,.84);
+  box-shadow:0 0 10px rgba(255,216,72,.86), inset 0 0 8px rgba(255,255,255,.34);
+  font-weight:900;
+  font-size:clamp(9px,1.0vw,18px);
+  line-height:1;
 }

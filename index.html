@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#070018" />
-  <title>BINGO v1006</title>
+  <title>BINGO v1007</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css?v=1006" />
+  <link rel="stylesheet" href="style.css?v=1007" />
 </head>
 <body>
-  <main id="app" class="app" aria-label="BINGO v1006">
+  <main id="app" class="app" aria-label="BINGO v1007">
     <section id="screenStart" class="screen screen-start is-active" aria-label="Ekran startowy BINGO">
       <div class="stage stage-start">
         <button id="btnPlay" class="hit-btn hit-play" type="button" aria-label="Graj">GRAJ</button>
@@ -30,7 +30,13 @@
           </div>
         </div>
 
+        <div id="drawMachine" class="draw-machine" aria-label="Maszyna losująca">
+          <div id="drawBall" class="draw-ball">?</div>
+        </div>
+
         <div id="bingoBoard" class="bingo-board" aria-label="Karta BINGO"></div>
+
+        <div id="drawnNumbers" class="drawn-numbers" aria-label="Wylosowane liczby"></div>
 
         <aside id="playersPanel" class="players-panel" aria-label="Gracze w pokoju"></aside>
 
@@ -38,6 +44,6 @@
       </div>
     </section>
   </main>
-  <script src="app.js?v=1006"></script>
+  <script src="app.js?v=1007"></script>
 </body>
 </html>

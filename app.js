@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1006';
+  const VERSION = 'BINGO v1007';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
@@ -12,6 +12,8 @@
   const playerNickEl = document.getElementById('playerNick');
   const roomCodeEl = document.getElementById('roomCode');
   const bingoBoard = document.getElementById('bingoBoard');
+  const drawBall = document.getElementById('drawBall');
+  const drawnNumbersEl = document.getElementById('drawnNumbers');
 
   const params = new URLSearchParams(window.location.search);
 
@@ -19,7 +21,12 @@
     nick: getStored('bingoNick') || params.get('nick') || 'Mariusz',
     roomCode: getStored('bingoRoomCode') || params.get('room') || 'PWG5N2D',
     players: [],
-    card: []
+    card: [],
+    drawnNumbers: [],
+    drawTimer: null,
+    drawSpinTimer: null,
+    bingoFinished: false,
+    isDrawing: false
   };
 
   function getStored(key){
@@ -150,9 +157,140 @@
     });
   }
 
+
+  function allNumbers(){
+    const numbers = [];
+    for(let n = 1; n <= 75; n++){
+      numbers.push(n);
+    }
+    return numbers;
+  }
+
+  function remainingNumbers(){
+    const used = new Set(state.drawnNumbers);
+    return allNumbers().filter(n => !used.has(n));
+  }
+
+  function renderDrawnNumbers(){
+    if(!drawnNumbersEl) return;
+
+    drawnNumbersEl.innerHTML = '';
+
+    state.drawnNumbers.forEach(number => {
+      const item = document.createElement('span');
+      item.className = 'drawn-number';
+      item.textContent = number;
+      drawnNumbersEl.appendChild(item);
+    });
+  }
+
+  function resetDrawMachine(){
+    state.drawnNumbers = [];
+    state.bingoFinished = false;
+    state.isDrawing = false;
+
+    if(state.drawTimer){
+      clearTimeout(state.drawTimer);
+      state.drawTimer = null;
+    }
+
+    if(state.drawSpinTimer){
+      clearInterval(state.drawSpinTimer);
+      state.drawSpinTimer = null;
+    }
+
+    if(drawBall){
+      drawBall.classList.remove('is-spinning');
+      drawBall.textContent = '?';
+    }
+
+    renderDrawnNumbers();
+  }
+
+  function startAutoDraw(){
+    if(state.bingoFinished) return;
+
+    if(state.drawTimer){
+      clearTimeout(state.drawTimer);
+      state.drawTimer = null;
+    }
+
+    state.drawTimer = setTimeout(drawNextNumber, 5000);
+  }
+
+  function drawNextNumber(){
+    if(state.bingoFinished || state.isDrawing) return;
+
+    const available = remainingNumbers();
+
+    if(!available.length){
+      state.bingoFinished = true;
+      return;
+    }
+
+    state.isDrawing = true;
+
+    if(drawBall){
+      drawBall.classList.add('is-spinning');
+      drawBall.textContent = '?';
+    }
+
+    if(state.drawSpinTimer){
+      clearInterval(state.drawSpinTimer);
+      state.drawSpinTimer = null;
+    }
+
+    state.drawSpinTimer = setInterval(() => {
+      if(!drawBall) return;
+      drawBall.textContent = String(available[Math.floor(Math.random() * available.length)]);
+    }, 90);
+
+    setTimeout(() => {
+      if(state.drawSpinTimer){
+        clearInterval(state.drawSpinTimer);
+        state.drawSpinTimer = null;
+      }
+
+      const finalNumber = available[Math.floor(Math.random() * available.length)];
+      state.drawnNumbers.push(finalNumber);
+
+      if(drawBall){
+        drawBall.classList.remove('is-spinning');
+        drawBall.textContent = String(finalNumber);
+      }
+
+      renderDrawnNumbers();
+      state.isDrawing = false;
+
+      if(!state.bingoFinished){
+        startAutoDraw();
+      }
+    }, 3000);
+  }
+
+  function stopDraws(){
+    state.bingoFinished = true;
+
+    if(state.drawTimer){
+      clearTimeout(state.drawTimer);
+      state.drawTimer = null;
+    }
+
+    if(state.drawSpinTimer){
+      clearInterval(state.drawSpinTimer);
+      state.drawSpinTimer = null;
+    }
+
+    if(drawBall){
+      drawBall.classList.remove('is-spinning');
+    }
+  }
+
   function newGameCard(){
+    resetDrawMachine();
     state.card = createBingoCard();
     renderBingoCard();
+    startAutoDraw();
   }
 
   function openGame(){
@@ -177,7 +315,10 @@
 
   btnPlay.addEventListener('click', openGame);
   btnExitStart.addEventListener('click', exitToGameRoom);
-  btnExitGame.addEventListener('click', () => showScreen('start'));
+  btnExitGame.addEventListener('click', () => {
+    stopDraws();
+    showScreen('start');
+  });
 
   document.addEventListener('keydown', (e) => {
     if(e.key === 'Escape') showScreen('start');
@@ -189,14 +330,15 @@
     setPlayers,
     openGame,
     showStart: () => showScreen('start'),
-    newGameCard
+    newGameCard,
+    stopDraws
   };
 
   setRoomData(state.nick, state.roomCode);
 
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js?v=1006').catch(()=>{});
+      navigator.serviceWorker.register('./sw.js?v=1007').catch(()=>{});
     });
   }
 
