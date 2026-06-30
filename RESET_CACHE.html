@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reset cache BINGO</title>
+  <style>
+    html,body{height:100%;margin:0;background:#030012;color:#fff;font-family:Arial,Helvetica,sans-serif;display:grid;place-items:center;text-align:center}
+    .box{max-width:640px;padding:30px;border:2px solid #1ab7ff;border-radius:18px;box-shadow:0 0 25px rgba(26,183,255,.7)}
+    h1{margin:0 0 16px;color:#ffe86a}
+    p{font-size:18px;line-height:1.45}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>BINGO v1010</h1>
+    <p>Czyszczę stare pliki gry i przeładowuję aktualną wersję...</p>
+  </div>
+  <script>
+    (async function(){
+      try {
+        if ('caches' in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(key => caches.delete(key)));
+        }
+
+        if ('serviceWorker' in navigator) {
+          const registrations = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(registrations.map(reg => reg.unregister()));
+        }
+      } catch(e) {}
+
+      setTimeout(function(){
+        location.replace('./index.html?v=1010&t=' + Date.now());
+      }, 600);
+    })();
+  </script>
+</body>
+</html>

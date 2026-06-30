@@ -1,7 +1,7 @@
 (function(){
   'use strict';
 
-  const VERSION = 'BINGO v1009';
+  const VERSION = 'BINGO v1010';
 
   const screenStart = document.getElementById('screenStart');
   const screenGame = document.getElementById('screenGame');
@@ -414,7 +414,25 @@
   btnExitStart.addEventListener('click', exitToGameRoom);
   btnExitGame.addEventListener('click', () => {
     stopDraws();
-    showScreen('start');
+  
+  // v1010: czyszczenie starego cache, żeby GitHub/telefon nie trzymał v1004/v1009.
+  function clearOldCache(){
+    if('caches' in window){
+      caches.keys()
+        .then(keys => Promise.all(keys.map(key => caches.delete(key))))
+        .catch(()=>{});
+    }
+
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations()
+        .then(registrations => Promise.all(registrations.map(reg => reg.unregister())))
+        .catch(()=>{});
+    }
+  }
+
+  clearOldCache();
+
+  showScreen('start');
   });
 
   document.addEventListener('keydown', (e) => {
@@ -437,9 +455,27 @@
 
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js?v=1009').catch(()=>{});
+      navigator.serviceWorker.register('./sw.js?v=1010').catch(()=>{});
     });
   }
+
+
+  // v1010: czyszczenie starego cache, żeby GitHub/telefon nie trzymał v1004/v1009.
+  function clearOldCache(){
+    if('caches' in window){
+      caches.keys()
+        .then(keys => Promise.all(keys.map(key => caches.delete(key))))
+        .catch(()=>{});
+    }
+
+    if('serviceWorker' in navigator){
+      navigator.serviceWorker.getRegistrations()
+        .then(registrations => Promise.all(registrations.map(reg => reg.unregister())))
+        .catch(()=>{});
+    }
+  }
+
+  clearOldCache();
 
   showScreen('start');
 })();
