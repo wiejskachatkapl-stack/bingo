@@ -1,0 +1,12 @@
+{
+  "name": "BINGO v1001",
+  "short_name": "BINGO",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#030012",
+  "theme_color": "#070018",
+  "orientation": "any",
+  "icons": [
+    { "src": "assets/icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
